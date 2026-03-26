@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Araceli — Build Log</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #faf9f7;
+    --white: #ffffff;
+    --ink: #1a1a1a;
+    --ink-faint: #9a9590;
+    --ink-mid: #5a5550;
+    --rule: #e8e4de;
+    --accent: #c0392b;
+    --accent-soft: rgba(192,57,43,0.08);
+    --fun: #2563a8;
+    --fun-soft: rgba(37,99,168,0.07);
+    --green: #1a7a4a;
+    --amber: #b45309;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { font-size: 16px; }
+  body { background: var(--paper); color: var(--ink); font-family: 'Lato', sans-serif; font-weight: 300; min-height: 100vh; }
+  header { border-bottom: 1px solid var(--rule); padding: 0 3rem; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; background: rgba(250,249,247,0.96); backdrop-filter: blur(8px); z-index: 100; }
+  .logo { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; letter-spacing: 0.02em; color: var(--ink); }
+  .logo span { font-style: italic; font-weight: 400; color: var(--ink-mid); font-size: 0.95rem; }
+  .header-actions { display: flex; align-items: center; gap: 2rem; }
+  .stats { font-size: 0.72rem; color: var(--ink-faint); letter-spacing: 0.06em; display: flex; gap: 1.5rem; }
+  .stats strong { color: var(--ink-mid); font-weight: 700; }
+  .btn-new { font-family: 'Lato', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.5rem 1.1rem; background: var(--ink); color: var(--white); border: none; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+  .btn-new:hover { background: #333; }
+  .btn-new:active { transform: scale(0.98); }
+  .hero { max-width: 860px; margin: 0 auto; padding: 5rem 2rem 4rem; border-bottom: 1px solid var(--rule); }
+  .hero-kicker { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 1.25rem; }
+  .hero-headline { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 400; line-height: 1.15; letter-spacing: -0.01em; color: var(--ink); margin-bottom: 1.5rem; }
+  .hero-headline em { font-style: italic; color: var(--accent); }
+  .hero-body { font-size: 1rem; line-height: 1.75; color: var(--ink-mid); max-width: 520px; font-weight: 300; }
+  .hero-meta { margin-top: 2.5rem; display: flex; gap: 3rem; }
+  .hero-stat-label { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.3rem; }
+  .hero-stat-val { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 600; color: var(--ink); line-height: 1; }
+  .main { max-width: 860px; margin: 0 auto; padding: 0 2rem 6rem; }
+  .section { padding-top: 4rem; }
+  .section-head { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--ink); }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; letter-spacing: -0.01em; }
+  .section-title.fun-title { color: var(--fun); }
+  .section-count { font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); font-weight: 700; }
+  .section-desc { font-size: 0.82rem; color: var(--ink-faint); line-height: 1.6; margin-bottom: 2rem; font-style: italic; }
+  .filter-row { display: flex; gap: 0.25rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .pill { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; padding: 0.28rem 0.8rem; border: 1px solid var(--rule); background: transparent; color: var(--ink-faint); cursor: pointer; border-radius: 99px; transition: all 0.15s; }
+  .pill:hover { border-color: var(--ink-mid); color: var(--ink-mid); }
+  .pill.active { background: var(--ink); color: var(--white); border-color: var(--ink); }
+  .pill.active.fun { background: var(--fun); border-color: var(--fun); }
+  .entry-list { display: flex; flex-direction: column; }
+  .entry { padding: 1.75rem 0; border-bottom: 1px solid var(--rule); cursor: pointer; transition: background 0.15s; margin: 0 -1.25rem; padding-left: 1.25rem; padding-right: 1.25rem; border-radius: 2px; animation: fadeUp 0.3s ease both; position: relative; }
+  .entry:hover { background: var(--white); }
+  .entry-inner { display: grid; grid-template-columns: 1fr auto; gap: 1.5rem; align-items: start; }
+  .entry-name { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 0.35rem; color: var(--ink); transition: color 0.15s; }
+  .entry:hover .entry-name { color: var(--accent); }
+  .entry.fun-entry:hover .entry-name { color: var(--fun); }
+  .entry-desc { font-size: 0.84rem; color: var(--ink-mid); line-height: 1.6; margin-bottom: 0.75rem; max-width: 540px; }
+  .entry-insight { border-left: 2px solid var(--rule); padding-left: 0.85rem; margin-bottom: 0.6rem; }
+  .entry-insight-label { font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); font-weight: 700; margin-bottom: 0.2rem; }
+  .entry-insight.learned .entry-insight-label { color: var(--accent); }
+  .entry-insight.relevant .entry-insight-label { color: var(--green); }
+  .entry-insight.fun-why .entry-insight-label { color: var(--fun); }
+  .entry-insight p { font-size: 0.8rem; color: var(--ink-mid); line-height: 1.55; font-style: italic; }
+  .entry-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+  .chip { font-size: 0.62rem; letter-spacing: 0.07em; text-transform: uppercase; font-weight: 700; padding: 0.15rem 0.55rem; background: var(--paper); border: 1px solid var(--rule); color: var(--ink-faint); border-radius: 2px; }
+  .chip.stack { border-color: #c9c0b8; color: var(--ink-mid); }
+  .entry-right { text-align: right; flex-shrink: 0; padding-top: 0.2rem; }
+  .status-label { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; display: inline-block; margin-bottom: 0.5rem; }
+  .status-label.active { color: var(--green); }
+  .status-label.paused { color: var(--amber); }
+  .status-label.shipped { color: var(--fun); }
+  .status-label.abandoned { color: var(--ink-faint); text-decoration: line-through; }
+  .entry-date { font-size: 0.65rem; color: var(--ink-faint); white-space: nowrap; display: block; margin-bottom: 0.5rem; }
+  .entry-link { font-size: 0.65rem; color: var(--ink-faint); text-decoration: none; letter-spacing: 0.06em; font-weight: 700; transition: color 0.15s; display: block; }
+  .entry-link:hover { color: var(--accent); }
+  .entry-delete { position: absolute; top: 1.5rem; right: 1.25rem; background: none; border: none; color: var(--rule); font-size: 0.8rem; cursor: pointer; transition: color 0.15s; opacity: 0; line-height: 1; padding: 2px; }
+  .entry:hover .entry-delete { opacity: 1; }
+  .entry-delete:hover { color: var(--accent); }
+  .entry-preview-toggle { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fun); border: 1px solid rgba(37,99,168,0.25); background: var(--fun-soft); padding: 0.3rem 0.75rem; border-radius: 2px; cursor: pointer; transition: all 0.15s; margin-top: 0.75rem; }
+  .entry-preview-toggle:hover { background: rgba(37,99,168,0.14); border-color: rgba(37,99,168,0.5); }
+  .entry-preview-toggle .arrow { transition: transform 0.2s; display: inline-block; }
+  .entry-preview-toggle.open .arrow { transform: rotate(90deg); }
+  .entry-preview-frame { display: none; margin-top: 1.25rem; border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; background: #050507; }
+  .entry-preview-frame.open { display: block; animation: fadeUp 0.25s ease; }
+  .entry-preview-bar { background: #111; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .preview-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .entry-preview-frame iframe { width: 100%; height: 620px; border: none; display: block; }
+  .empty { padding: 3rem 0; color: var(--ink-faint); font-style: italic; font-size: 0.9rem; border-bottom: 1px solid var(--rule); }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(26,26,26,0.5); z-index: 500; align-items: center; justify-content: center; backdrop-filter: blur(3px); padding: 1rem; }
+  .modal-overlay.active { display: flex; animation: fadeIn 0.18s ease; }
+  .modal { background: var(--white); width: 100%; max-width: 580px; padding: 2.5rem; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.18); border-top: 3px solid var(--ink); }
+  .modal.fun-modal { border-top-color: var(--fun); }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 600; margin-bottom: 0.25rem; }
+  .modal-subtitle { font-size: 0.75rem; color: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; margin-bottom: 2rem; }
+  .field { margin-bottom: 1.2rem; }
+  .field label { display: block; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 700; color: var(--ink-mid); margin-bottom: 0.4rem; }
+  .field input, .field textarea, .field select { width: 100%; background: var(--paper); border: 1px solid var(--rule); border-bottom: 1px solid #ccc; color: var(--ink); padding: 0.65rem 0.75rem; font-family: 'Lato', sans-serif; font-size: 0.88rem; font-weight: 300; outline: none; transition: border-color 0.2s; -webkit-appearance: none; border-radius: 0; }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--ink); background: var(--white); }
+  .field textarea { resize: vertical; min-height: 75px; }
+  .field-hint { font-size: 0.62rem; color: var(--ink-faint); margin-top: 0.3rem; font-style: italic; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .modal-divider { border: none; border-top: 1px solid var(--rule); margin: 1.5rem 0 1.25rem; }
+  .modal-section-label { font-size: 0.63rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; color: var(--ink-faint); margin-bottom: 1rem; }
+  .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.75rem; }
+  .btn-cancel { font-family: 'Lato', sans-serif; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; padding: 0.6rem 1.1rem; background: transparent; border: 1px solid var(--rule); color: var(--ink-faint); cursor: pointer; transition: all 0.15s; }
+  .btn-cancel:hover { border-color: var(--ink-mid); color: var(--ink); }
+  .btn-save { font-family: 'Lato', sans-serif; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; padding: 0.6rem 1.4rem; background: var(--ink); color: var(--white); border: none; cursor: pointer; transition: background 0.15s; }
+  .btn-save:hover { background: #333; }
+  .btn-save.fun { background: var(--fun); }
+  .btn-save.fun:hover { background: #1a4f8a; }
+  .type-toggle { display: flex; gap: 0; margin-bottom: 2rem; border: 1px solid var(--rule); align-self: flex-start; width: fit-content; }
+  .type-btn { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; padding: 0.5rem 1.1rem; background: transparent; border: none; color: var(--ink-faint); cursor: pointer; transition: all 0.15s; }
+  .type-btn:first-child { border-right: 1px solid var(--rule); }
+  .type-btn.active { background: var(--ink); color: var(--white); }
+  .type-btn.active.fun { background: var(--fun); }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: var(--paper); }
+  ::-webkit-scrollbar-thumb { background: var(--rule); }
+  @media (max-width: 600px) {
+    header { padding: 0 1.25rem; }
+    .hero { padding: 3rem 1.25rem 2.5rem; }
+    .hero-meta { gap: 2rem; }
+    .main { padding: 0 1.25rem 4rem; }
+    .stats { display: none; }
+    .entry-inner { grid-template-columns: 1fr; }
+    .entry-right { text-align: left; }
+    .field-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<style>
+  #gate {
+    position: fixed; inset: 0; background: var(--paper);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999; flex-direction: column; gap: 1.5rem;
+  }
+  #gate-inner {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 1.25rem; width: 100%; max-width: 320px; padding: 0 1.5rem;
+  }
+  #gate-logo {
+    font-family: 'Playfair Display', serif; font-size: 1.1rem;
+    font-weight: 600; letter-spacing: 0.02em; color: var(--ink);
+    margin-bottom: 0.25rem;
+  }
+  #gate-logo span { font-style: italic; font-weight: 400; color: var(--ink-mid); font-size: 0.95rem; }
+  #gate-label {
+    font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
+    font-weight: 700; color: var(--ink-faint); text-align: center;
+  }
+  #gate-input {
+    width: 100%; padding: 0.75rem 1rem; font-family: 'Lato', sans-serif;
+    font-size: 0.95rem; font-weight: 300; background: var(--white);
+    border: 1px solid var(--rule); border-bottom: 1px solid #ccc;
+    color: var(--ink); outline: none; border-radius: 0;
+    text-align: center; letter-spacing: 0.1em;
+    transition: border-color 0.2s;
+  }
+  #gate-input:focus { border-color: var(--ink); }
+  #gate-input.shake {
+    animation: shake 0.35s ease;
+    border-color: var(--accent);
+  }
+  #gate-btn {
+    width: 100%; padding: 0.65rem; font-family: 'Lato', sans-serif;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; background: var(--ink); color: var(--white);
+    border: none; cursor: pointer; transition: background 0.2s;
+  }
+  #gate-btn:hover { background: #333; }
+  #gate-error {
+    font-size: 0.72rem; color: var(--accent); letter-spacing: 0.06em;
+    height: 1rem; text-align: center;
+  }
+  @keyframes shake {
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-8px)}
+    40%{transform:translateX(8px)}
+    60%{transform:translateX(-5px)}
+    80%{transform:translateX(5px)}
+  }
+</style>
+
+<div id="gate">
+  <div id="gate-inner">
+    <div id="gate-logo">Araceli <span>/ build log</span></div>
+    <div id="gate-label">Password required</div>
+    <input id="gate-input" type="password" placeholder="enter password"
+      onkeydown="if(event.key==='Enter')checkPassword()" autofocus />
+    <div id="gate-error"></div>
+    <button id="gate-btn" onclick="checkPassword()">Enter</button>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const PASSWORD = 'W@terloo2027';
+    const SESSION_KEY = 'buildlog_auth';
+
+    if (sessionStorage.getItem(SESSION_KEY) === 'true') {
+      document.getElementById('gate').style.display = 'none';
+    }
+
+    window.checkPassword = function() {
+      const val = document.getElementById('gate-input').value;
+      if (val === PASSWORD) {
+        sessionStorage.setItem(SESSION_KEY, 'true');
+        document.getElementById('gate').style.display = 'none';
+      } else {
+        const inp = document.getElementById('gate-input');
+        const err = document.getElementById('gate-error');
+        inp.classList.remove('shake');
+        void inp.offsetWidth;
+        inp.classList.add('shake');
+        inp.value = '';
+        err.textContent = 'Incorrect password';
+        setTimeout(() => { err.textContent = ''; inp.classList.remove('shake'); }, 2000);
+      }
+    };
+  })();
+</script>
+
+<header>
+  <div class="logo">Araceli <span>/ build log</span></div>
+  <div class="header-actions">
+    <div class="stats">
+      <span><strong id="stat-total">0</strong> total</span>
+      <span><strong id="stat-active">0</strong> active</span>
+      <span><strong id="stat-shipped">0</strong> shipped</span>
+    </div>
+    <button class="btn-new" onclick="openModal('work')">+ Add entry</button>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-kicker">Proof of work</div>
+  <h1 class="hero-headline">
+    Integrating AI into<br>
+    the flow of <em>work.</em>
+  </h1>
+  <p class="hero-body">Every entry here is a real thing I built to solve a real problem. This log exists to show what it looks like when a seller actually uses the product they want to sell.</p>
+  <div class="hero-meta">
+    <div>
+      <div class="hero-stat-label">Work projects</div>
+      <div class="hero-stat-val" id="work-count">0</div>
+    </div>
+    <div>
+      <div class="hero-stat-label">Fun / AI experiments</div>
+      <div class="hero-stat-val" id="fun-count">0</div>
+    </div>
+  </div>
+</div>
+
+<main class="main">
+  <div class="section" id="section-work">
+    <div class="section-head">
+      <div class="section-title">Work projects</div>
+      <div class="section-count" id="work-section-count">0 entries</div>
+    </div>
+    <p class="section-desc">Sales tools I've built to solve real problems in my workflow — each one a proof point for why I belong at Anthropic.</p>
+    <div class="filter-row" id="work-filters">
+      <button class="pill active" onclick="setFilter('work','all',this)">All</button>
+      <button class="pill" onclick="setFilter('work','active',this)">Active</button>
+      <button class="pill" onclick="setFilter('work','paused',this)">Paused</button>
+      <button class="pill" onclick="setFilter('work','shipped',this)">Shipped</button>
+      <button class="pill" onclick="setFilter('work','abandoned',this)">Abandoned</button>
+      <button class="pill" onclick="openModal('work')" style="margin-left:auto;border-color:var(--ink-mid);color:var(--ink-mid)">+ Add</button>
+    </div>
+    <div class="entry-list" id="work-list"></div>
+  </div>
+
+  <div class="section" id="section-fun">
+    <div class="section-head">
+      <div class="section-title fun-title">AI experiments</div>
+      <div class="section-count" id="fun-section-count">0 entries</div>
+    </div>
+    <p class="section-desc">Things I've built just because I wanted to — exploring what's possible with AI, satisfying curiosity, showing range.</p>
+    <div class="filter-row" id="fun-filters">
+      <button class="pill active" onclick="setFilter('fun','all',this)">All</button>
+      <button class="pill" onclick="setFilter('fun','active',this)">Active</button>
+      <button class="pill" onclick="setFilter('fun','shipped',this)">Shipped</button>
+      <button class="pill active fun" onclick="openModal('fun')" style="margin-left:auto">+ Add</button>
+    </div>
+    <div class="entry-list" id="fun-list"></div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal-box">
+    <div class="modal-title" id="modal-title">New entry</div>
+    <div class="modal-subtitle" id="modal-subtitle">Work project</div>
+    <div class="field"><label>Project name</label><input type="text" id="f-name" placeholder="e.g. Stakeholder Power Map" /></div>
+    <div class="field"><label>What I built & why</label><textarea id="f-desc" placeholder="What problem does this solve?"></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>Status</label><select id="f-status"><option value="active">Active</option><option value="paused">Paused</option><option value="shipped">Shipped</option><option value="abandoned">Abandoned</option></select></div>
+      <div class="field"><label>Stack / tools</label><input type="text" id="f-stack" placeholder="e.g. React, Claude API" /></div>
+    </div>
+    <div class="field"><label>Tags</label><input type="text" id="f-tags" placeholder="e.g. sales-tool, automation" /><div class="field-hint">separate with commas</div></div>
+    <div id="work-fields">
+      <hr class="modal-divider">
+      <div class="modal-section-label">For the interview</div>
+      <div class="field"><label>What I learned</label><textarea id="f-learnings" placeholder="New skill or insight this taught you"></textarea></div>
+      <div class="field"><label>Why this matters for AI sales</label><textarea id="f-relevance" placeholder="How does building this make you a better AI seller?"></textarea></div>
+    </div>
+    <div id="fun-fields" style="display:none">
+      <hr class="modal-divider">
+      <div class="modal-section-label">The fun part</div>
+      <div class="field"><label>What made it interesting</label><textarea id="f-funwhy" placeholder="What drew you to this? What surprised you?"></textarea></div>
+    </div>
+    <hr class="modal-divider">
+    <div class="field"><label>Link (optional)</label><input type="text" id="f-link" placeholder="https://" /></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" id="btn-save" onclick="saveEntry()">Save entry</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORE_KEY = 'buildlog_minimal_v1';
+  let data = JSON.parse(localStorage.getItem(STORE_KEY) || '{"work":[],"fun":[]}');
+  let filters = { work: 'all', fun: 'all' };
+  let editingSection = null;
+  let editingId = null;
+  let modalSection = 'work';
+
+  function save() { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
+
+  function openModal(section, id = null) {
+    modalSection = section;
+    editingSection = id ? section : null;
+    editingId = id;
+    const isFun = section === 'fun';
+    const box = document.getElementById('modal-box');
+    const saveBtn = document.getElementById('btn-save');
+    box.className = 'modal' + (isFun ? ' fun-modal' : '');
+    saveBtn.className = 'btn-save' + (isFun ? ' fun' : '');
+    document.getElementById('work-fields').style.display = isFun ? 'none' : 'block';
+    document.getElementById('fun-fields').style.display = isFun ? 'block' : 'none';
+    document.getElementById('modal-subtitle').textContent = isFun ? 'AI experiment' : 'Work project';
+    if (id) {
+      const p = data[section].find(x => x.id === id);
+      document.getElementById('modal-title').textContent = 'Edit entry';
+      document.getElementById('f-name').value = p.name;
+      document.getElementById('f-desc').value = p.desc || '';
+      document.getElementById('f-status').value = p.status;
+      document.getElementById('f-stack').value = p.stack || '';
+      document.getElementById('f-tags').value = (p.tags||[]).join(', ');
+      document.getElementById('f-learnings').value = p.learnings || '';
+      document.getElementById('f-relevance').value = p.relevance || '';
+      document.getElementById('f-funwhy').value = p.funwhy || '';
+      document.getElementById('f-link').value = p.link || '';
+    } else {
+      document.getElementById('modal-title').textContent = isFun ? 'New AI experiment' : 'New work project';
+      ['f-name','f-desc','f-stack','f-tags','f-learnings','f-relevance','f-funwhy','f-link'].forEach(f => document.getElementById(f).value = '');
+      document.getElementById('f-status').value = 'active';
+    }
+    document.getElementById('modal-overlay').classList.add('active');
+    setTimeout(() => document.getElementById('f-name').focus(), 80);
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('active');
+    editingId = null; editingSection = null;
+  }
+
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  }
+
+  function saveEntry() {
+    const name = document.getElementById('f-name').value.trim();
+    if (!name) { document.getElementById('f-name').focus(); return; }
+    const entry = {
+      name,
+      desc: document.getElementById('f-desc').value.trim(),
+      status: document.getElementById('f-status').value,
+      stack: document.getElementById('f-stack').value.trim(),
+      tags: document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+      learnings: document.getElementById('f-learnings').value.trim(),
+      relevance: document.getElementById('f-relevance').value.trim(),
+      funwhy: document.getElementById('f-funwhy').value.trim(),
+      link: document.getElementById('f-link').value.trim(),
+    };
+    if (editingId) {
+      const idx = data[modalSection].findIndex(x => x.id === editingId);
+      data[modalSection][idx] = { ...data[modalSection][idx], ...entry };
+    } else {
+      entry.id = Date.now().toString();
+      entry.date = new Date().toISOString();
+      data[modalSection].unshift(entry);
+    }
+    save(); closeModal(); render();
+  }
+
+  function deleteEntry(section, id, e) {
+    e.stopPropagation();
+    if (confirm('Remove this entry?')) {
+      data[section] = data[section].filter(x => x.id !== id);
+      save(); render();
+    }
+  }
+
+  function setFilter(section, f, el) {
+    filters[section] = f;
+    const container = section === 'work' ? 'work-filters' : 'fun-filters';
+    document.querySelectorAll(`#${container} .pill`).forEach(b => {
+      if (b.onclick && b.onclick.toString().includes('openModal')) return;
+      b.classList.remove('active','fun');
+    });
+    el.classList.add('active');
+    if (section === 'fun') el.classList.add('fun');
+    render();
+  }
+
+  function formatDate(iso) {
+    return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  }
+
+  function togglePreview(id, e) {
+    e.stopPropagation();
+    const btn = document.getElementById('prev-btn-' + id);
+    const frame = document.getElementById('prev-frame-' + id);
+    const isOpen = frame.classList.contains('open');
+    frame.classList.toggle('open', !isOpen);
+    btn.classList.toggle('open', !isOpen);
+    btn.querySelector('.arrow').textContent = isOpen ? '▶' : '▼';
+    if (!isOpen) {
+      const iframe = frame.querySelector('iframe');
+      if (!iframe.srcdoc) {
+        const entry = [...data.work, ...data.fun].find(p => p.id === id);
+        if (entry && entry.embedHtml) iframe.srcdoc = entry.embedHtml;
+      }
+    }
+  }
+
+  function renderSection(section) {
+    const isFun = section === 'fun';
+    const filter = filters[section];
+    const items = filter === 'all' ? data[section] : data[section].filter(p => p.status === filter);
+    const listEl = document.getElementById(`${section}-list`);
+    const countEl = document.getElementById(`${section}-section-count`);
+    countEl.textContent = `${data[section].length} ${data[section].length === 1 ? 'entry' : 'entries'}`;
+    if (!items.length) {
+      listEl.innerHTML = `<div class="empty">${filter === 'all' ? 'No entries yet — add your first one.' : `No ${filter} entries.`}</div>`;
+      return;
+    }
+    listEl.innerHTML = items.map((p, i) => `
+      <div class="entry${isFun ? ' fun-entry' : ''}" onclick="openModal('${section}','${p.id}')" style="animation-delay:${i*0.04}s">
+        <button class="entry-delete" onclick="deleteEntry('${section}','${p.id}',event)">✕</button>
+        <div class="entry-inner">
+          <div>
+            <div class="entry-name">${p.name}</div>
+            ${p.desc ? `<div class="entry-desc">${p.desc}</div>` : ''}
+            ${p.learnings ? `<div class="entry-insight learned"><div class="entry-insight-label">What I learned</div><p>${p.learnings}</p></div>` : ''}
+            ${p.relevance ? `<div class="entry-insight relevant"><div class="entry-insight-label">Why it matters for AI sales</div><p>${p.relevance}</p></div>` : ''}
+            ${p.funwhy ? `<div class="entry-insight fun-why"><div class="entry-insight-label">What made it interesting</div><p>${p.funwhy}</p></div>` : ''}
+            <div class="entry-chips">
+              ${p.stack ? `<span class="chip stack">${p.stack}</span>` : ''}
+              ${(p.tags||[]).map(t=>`<span class="chip">${t}</span>`).join('')}
+            </div>
+            ${p.embedHtml ? `
+              <button id="prev-btn-${p.id}" class="entry-preview-toggle" onclick="togglePreview('${p.id}',event)">
+                <span class="arrow">▶</span> Live preview
+              </button>
+              <div id="prev-frame-${p.id}" class="entry-preview-frame">
+                <div class="entry-preview-bar">
+                  <div class="preview-dot" style="background:#ff5f57"></div>
+                  <div class="preview-dot" style="background:#febc2e"></div>
+                  <div class="preview-dot" style="background:#28c840"></div>
+                  <span style="font-size:0.65rem;color:#555;margin-left:0.5rem;font-family:monospace">${p.name}</span>
+                </div>
+                <iframe sandbox="allow-scripts"></iframe>
+              </div>
+            ` : ''}
+          </div>
+          <div class="entry-right">
+            <span class="entry-date">${formatDate(p.date)}</span>
+            <span class="status-label ${p.status}">${p.status}</span>
+            ${p.link ? `<a href="${p.link}" target="_blank" class="entry-link" onclick="event.stopPropagation()">↗ view</a>` : ''}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function render() {
+    const allProjects = [...data.work, ...data.fun];
+    document.getElementById('stat-total').textContent = allProjects.length;
+    document.getElementById('stat-active').textContent = allProjects.filter(p=>p.status==='active').length;
+    document.getElementById('stat-shipped').textContent = allProjects.filter(p=>p.status==='shipped').length;
+    document.getElementById('work-count').textContent = data.work.length;
+    document.getElementById('fun-count').textContent = data.fun.length;
+    renderSection('work');
+    renderSection('fun');
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  const F1_HTML = atob("PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CjxtZXRhIGNoYXJzZXQ9IlVURi04Ij4KPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xLjAiPgo8dGl0bGU+RjEgMjAyNiDigJQgQ2hhbXBpb25zaGlwIFByZWRpY3RvcjwvdGl0bGU+CjxsaW5rIGhyZWY9Imh0dHBzOi8vZm9udHMuZ29vZ2xlYXBpcy5jb20vY3NzMj9mYW1pbHk9QmViYXMrTmV1ZSZmYW1pbHk9RE0rU2Fuczp3Z2h0QDMwMDs0MDA7NTAwOzcwMCZmYW1pbHk9SmV0QnJhaW5zK01vbm86d2dodEA0MDA7NzAwJmRpc3BsYXk9c3dhcCIgcmVsPSJzdHlsZXNoZWV0Ij4KPHN0eWxlPgogIDpyb290IHsKICAgIC0tYmc6IzA1MDUwNzstLXN1cmZhY2U6IzBkMGQxMjstLWNhcmQ6IzEyMTIxYTstLWJvcmRlcjpyZ2JhKDI1NSwyNTUsMjU1LDAuMDcpOwogICAgLS1hY2NlbnQ6I2UxMDYwMDstLWdvbGQ6I2Y1Yzg0MjstLXNpbHZlcjojYjBiOGMxOy0tYnJvbnplOiNjZDdmMzI7CiAgICAtLXRleHQ6I2YwZjBmMDstLW11dGVkOiM2YjZiN2I7LS1ncmVlbjojMzlkMzUzOwogIH0KICAqe21hcmdpbjowO3BhZGRpbmc6MDtib3gtc2l6aW5nOmJvcmRlci1ib3g7fQogIGJvZHl7YmFja2dyb3VuZDp2YXIoLS1iZyk7Y29sb3I6dmFyKC0tdGV4dCk7Zm9udC1mYW1pbHk6J0RNIFNhbnMnLHNhbnMtc2VyaWY7bWluLWhlaWdodDoxMDB2aDtvdmVyZmxvdy14OmhpZGRlbjt9");
+
+  const SEED_WORK = [
+    {
+      id: 'ai-task-manager', date: new Date().toISOString(),
+      name: 'AI-Powered Sales Task Manager',
+      desc: 'A fully custom task management system built entirely with Claude — no templates, no SaaS tools, no developer. Seven boards: Urgent, Backlog, Ideas, Waiting on Others, Outreach Tracker, Brain Dump, Call Transcripts, and Completed. The outreach tracker uses the Claude API to auto-fill contact name, company, and a draft note from any name, context snippet, or raw transcript. The transcript analyzer reads a full call transcript, extracts every action item, classifies it by board (urgent vs backlog vs outreach vs waiting), pulls the contact name and company directly from the transcript, and routes everything in one click. Every item is editable and movable between boards via a universal move menu. Runs as a standalone HTML file — no login, no subscription, works in any browser, data persists in localStorage.',
+      status: 'active',
+      stack: 'Claude, HTML/CSS/JS, Claude API, localStorage',
+      tags: ['sales-ops', 'workflow', 'claude-api', 'ai-native', 'no-code'],
+      learnings: 'localStorage stores everything as a string, which means field names matter exactly. When the Claude API returned contact_name instead of name, every outreach entry rendered as undefined. Debugging that taught me to build defensive migration logic on every load and intercept data at the save layer rather than patching the render layer. The gap between works in the widget and works as a downloaded file is mostly about API headers — the anthropic-dangerous-direct-browser-access flag is required for direct browser calls, and figuring that out from a raw error message was a real forcing function for actually reading documentation.',
+      relevance: 'This is the most direct proof I have that I actually use AI the way I ask customers to. I did not describe a workflow problem to an IT team and wait six weeks. I opened Claude and started building. Every feature came from a real friction point in my day — the outreach tracker exists because I was dropping follow-ups, the transcript analyzer exists because I was spending 20 minutes after every call manually extracting next steps. The fact that it works, survives real debugging, and runs off a single HTML file is the argument. Not the pitch deck version of it — the actual thing.',
+      funwhy: '', link: ''
+    },
+    {
+      id: 'analytics-map', date: new Date(Date.now() - 2 * 86400000).toISOString(),
+      name: 'Analytics Business Problem Map',
+      desc: 'An interactive web tool mapping 70 real business problems across 7 departments to the Salesforce analytics product that solves each one. Built to help AEs keep analytics top of mind in every customer conversation — with live filtering by product, keyword search, color-coded tagging, and a second tab mapping expansion gaps for customers already running Tableau, CRMA, or Revenue Intelligence. Also ships as a polished 9-slide PPTX deck. Hosted on GitHub Pages, shareable via URL, no login required.',
+      status: 'shipped', stack: 'Claude, HTML/CSS/JS, GitHub Pages, PPTX',
+      tags: ['enablement', 'salesforce', 'analytics', 'github-pages'],
+      learnings: 'Claude can structure an entire problem framework — 7 departments, 70 use cases, full product mapping — from a plain-language description of the business need. Each feature (filtering, second tab, deck) came from a single conversational prompt. GitHub Pages has a 404 gotcha with file naming that took real troubleshooting to solve — debugging from screenshots in real time with Claude taught me to treat deployment friction as part of the build, not a blocker.',
+      relevance: "This is the kind of enablement asset that would normally take a solutions consultant, a designer, and a PM a few weeks to produce. I built and deployed the whole thing in one afternoon by knowing what problem I was trying to solve and using AI to close the execution gap. That's the argument for AI-native sellers — not that we work harder, but that the gap between idea and shipped tool collapses entirely.",
+      funwhy: '', link: 'https://arrrraceli.github.io/Analytics-Business-Problem-Mapping-/'
+    },
+    {
+      id: 'amkor', date: new Date(Date.now() - 3 * 86400000).toISOString(),
+      name: 'Amkor Technology Deal Intelligence Power Map',
+      desc: 'An interactive stakeholder power map for a real enterprise deal — 47 contacts across 7 departments (Board of Directors, C-Suite, Sales, Finance, Operations, Engineering, IT) spanning 8 countries. Each contact card shows name, title, seniority, department, location, LinkedIn, and a live status indicator. Fully filterable, searchable, and groupable. Built entirely with Claude over 30+ conversation turns and deployed to CodeSandbox.',
+      status: 'active', stack: 'Claude, React, CodeSandbox',
+      tags: ['deal-intelligence', 'stakeholder-mapping', 'sales-engineering', 'enterprise'],
+      learnings: 'React state is session-only — photos and status changes need a backend or hardcoded values to persist across refreshes. I learned this the hard way and now design for that constraint from the start. Iterative building with Claude works best when you treat each conversation turn like a pull request: one focused change, verified before moving on.',
+      relevance: "This is exactly the kind of tool that separates AI-native sellers from everyone else. I didn't wait for ops to build a Salesforce view. I didn't export a spreadsheet and share a screenshot. I built a living, interactive intelligence layer for a real in-flight account — in a single conversation — using nothing but Claude and a browser.",
+      funwhy: '', link: 'https://cj3kz3.csb.app'
+    },
+    {
+      id: 'realestate', date: new Date(Date.now() - 1 * 86400000).toISOString(),
+      name: 'Real Estate Agent Lead Gen & Outreach Campaign',
+      desc: 'Used Claude and Claude Code to build a targeted outreach campaign for real estate agents across 5 markets (Carson City NV, Incline Village NV, Reno NV, South Lake Tahoe CA, Truckee CA). Produced 4,047 verified leads from official government licensee databases, a full 8-touch email + LinkedIn campaign strategy, and an outreach tracker — with zero prior Python experience.',
+      status: 'shipped', stack: 'Claude, Claude Code, Python, Excel',
+      tags: ['lead-gen', 'outreach', 'automation', 'claude-code'],
+      learnings: 'Claude chat excels at strategy and formatted deliverables — saved hours on campaign design immediately. Claude Code is powerful for bounded technical tasks (pulled and filtered 4,047 government records in minutes) but fails silently on open-ended tasks like web enrichment.',
+      relevance: "This is the clearest proof I actually use the product. I came in with a real business problem and zero technical background, and came out the other side with 4,047 verified leads and a complete campaign. I also documented exactly where Claude Code broke down and why — the kind of honest product knowledge that makes a great AI seller.",
+      funwhy: '', link: ''
+    }
+  ];
+
+  const SEED_FUN = [
+    {
+      id: 'f1pred', date: new Date(Date.now() - 3 * 86400000).toISOString(),
+      name: 'F1 2026 Championship Predictor',
+      desc: 'An AI-powered pre-season prediction dashboard for the 2026 F1 season — drivers championship odds, constructors standings, sandbagging meter, and full methodology breakdown. Built entirely with Claude.',
+      status: 'shipped', stack: 'HTML, CSS, JS, Claude',
+      tags: ['f1', 'data-viz', 'ai-experiment'],
+      learnings: '', relevance: '',
+      funwhy: "Pure curiosity. I wanted to see how good Claude was at reasoning about real-world, data-sparse prediction problems — synthesizing testing pace, PU assessments, reliability data, and historical patterns. Turns out: very good. It produced something that looks like a legitimate analytics tool, not a toy.",
+      link: '', embedHtml: F1_HTML
+    },
+    {
+      id: 'buildlog', date: new Date().toISOString(),
+      name: 'This Build Log',
+      desc: "A personal portfolio of everything I've been building — two themes (dark techy and light minimal), live embedded project previews, and interview-focused fields on every entry.",
+      status: 'shipped', stack: 'HTML, CSS, JS, Claude',
+      tags: ['meta', 'portfolio'],
+      learnings: '', relevance: '',
+      funwhy: "Built entirely with Claude to document the journey. The fact that it exists is kind of the point — showing, not telling.",
+      link: ''
+    }
+  ];
+
+  function upsertSeeds(section, seeds) {
+    const existing = new Set(data[section].map(e => e.id));
+    seeds.forEach(s => {
+      if (!existing.has(s.id)) data[section].push(s);
+    });
+    data[section].sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+
+  upsertSeeds('work', SEED_WORK);
+  upsertSeeds('fun', SEED_FUN);
+  save();
+  render();
+</script>
+</body>
+</html>
